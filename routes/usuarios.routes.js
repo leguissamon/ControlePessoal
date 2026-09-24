@@ -16,5 +16,8 @@ router.post('/', (req, res) => {
 
   res.status(201).json(usuario);
 });
-
+// Listar usuários
+router.get('/', (req, res) => {
+  res.json(db.usuarios);
+});
 module.exports = router;
