@@ -20,4 +20,16 @@ router.post('/', (req, res) => {
 router.get('/', (req, res) => {
   res.json(db.usuarios);
 });
+
+// Buscar usuário por id
+router.get('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const usuario = db.usuarios.find((u) => u.id === id);
+
+  if (!usuario) {
+    return res.status(404).json({ erro: 'Usuário não encontrado.' });
+  }
+
+  res.json(usuario);
+});
 module.exports = router;
