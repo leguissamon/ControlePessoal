@@ -53,4 +53,18 @@ router.put('/:id', (req, res) => {
 
   res.json(usuario);
 });
+
+// Excluir usuário
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const indice = db.usuarios.findIndex((u) => u.id === id);
+
+  if (indice === -1) {
+    return res.status(404).json({ erro: 'Usuário não encontrado.' });
+  }
+
+  db.usuarios.splice(indice, 1);
+
+  res.status(204).send();
+});
 module.exports = router;
