@@ -32,4 +32,25 @@ router.get('/:id', (req, res) => {
 
   res.json(usuario);
 });
+
+// Atualizar usuário
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const usuario = db.usuarios.find((u) => u.id === id);
+
+  if (!usuario) {
+    return res.status(404).json({ erro: 'Usuário não encontrado.' });
+  }
+
+  const { nome, email } = req.body ?? {};
+
+  if (!nome || !email) {
+    return res.status(400).json({ erro: 'Os campos "nome" e "email" são obrigatórios.' });
+  }
+
+  usuario.nome = nome;
+  usuario.email = email;
+
+  res.json(usuario);
+});
 module.exports = router;
