@@ -1,7 +1,16 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
+const { ErroHttp } = require('../utils/erros');
 
 const router = Router();
+
+function buscarUsuario(id) {
+  const usuario = db.usuarios.find((u) => u.id === id);
+  if (!usuario) {
+    throw new ErroHttp(404, 'Usuário não encontrado.');
+  }
+  return usuario;
+}
 
 // Criar usuário
 router.post('/', (req, res) => {
