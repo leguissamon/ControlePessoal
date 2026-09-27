@@ -69,4 +69,17 @@ router.put('/:id', (req, res) => {
   conta.nome = nome;
   res.json(conta);
 });
+
+// Excluir conta (só se não tiver lançamentos)
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const conta = db.contas.find((c) => c.id === id);
+
+  if (!conta) {
+    throw new ErroHttp(404, 'Conta não encontrada.');
+  }
+
+  db.contas.splice(db.contas.indexOf(conta), 1);
+  res.status(204).send();
+});
 module.exports = router;
