@@ -35,4 +35,27 @@ router.post('/', (req, res) => {
   res.status(201).json(categoria);
 });
 
+// Listar categorias (filtro opcional por usuário: ?usuarioId=1)
+router.get('/', (req, res) => {
+  let categorias = db.categorias;
+
+  if (req.query.usuarioId) {
+    const usuarioId = Number(req.query.usuarioId);
+    categorias = categorias.filter((c) => c.usuarioId === usuarioId);
+  }
+
+  res.json(categorias);
+});
+
+// Buscar categoria por id
+router.get('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const categoria = db.categorias.find((c) => c.id === id);
+
+  if (!categoria) {
+    throw new ErroHttp(404, 'Categoria não encontrada.');
+  }
+
+  res.json(categoria);
+});
 module.exports = router;
