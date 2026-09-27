@@ -2,6 +2,7 @@ const express = require('express');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const { naoEncontrado, tratadorDeErros } = require('./middlewares/erros');
 const contasRoutes = require('./routes/contas.routes');
+const categoriasRoutes = require('./routes/categorias.routes');
 
 const app = express();
 const PORT = 3000;
@@ -14,6 +15,8 @@ app.get('/', (req, res) => {
 
 app.use('/usuarios', usuariosRoutes);
 app.use('/contas', contasRoutes);
+app.use('/categorias', categoriasRoutes);
+
 app.use(naoEncontrado);
 app.use(tratadorDeErros);
 
