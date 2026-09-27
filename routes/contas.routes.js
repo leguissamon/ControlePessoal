@@ -50,4 +50,23 @@ router.get('/:id', (req, res) => {
 
   res.json(conta);
 });
+
+// Atualizar conta (só o nome pode mudar)
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const conta = db.contas.find((c) => c.id === id);
+
+  if (!conta) {
+    throw new ErroHttp(404, 'Conta não encontrada.');
+  }
+
+  const { nome } = req.body ?? {};
+
+  if (!nome) {
+    throw new ErroHttp(400, 'O campo "nome" é obrigatório.');
+  }
+
+  conta.nome = nome;
+  res.json(conta);
+});
 module.exports = router;
