@@ -84,4 +84,17 @@ router.put('/:id', (req, res) => {
 
   res.json(categoria);
 });
+
+// Excluir categoria (só se não tiver lançamentos)
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const categoria = db.categorias.find((c) => c.id === id);
+
+  if (!categoria) {
+    throw new ErroHttp(404, 'Categoria não encontrada.');
+  }
+
+  db.categorias.splice(db.categorias.indexOf(categoria), 1);
+  res.status(204).send();
+});
 module.exports = router;
