@@ -58,4 +58,30 @@ router.get('/:id', (req, res) => {
 
   res.json(categoria);
 });
+
+// Atualizar categoria
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const categoria = db.categorias.find((c) => c.id === id);
+
+  if (!categoria) {
+    throw new ErroHttp(404, 'Categoria não encontrada.');
+  }
+
+  const { nome, tipo } = req.body ?? {};
+
+  if (!nome) {
+    throw new ErroHttp(400, 'O campo "nome" é obrigatório.');
+  }
+
+  const tipoFinal = tipo || categoria.tipo;
+  if (!TIPOS_VALIDOS.includes(tipoFinal)) {
+    throw new ErroHttp(400, `O campo "tipo" deve ser um destes: ${TIPOS_VALIDOS.join(', ')}.`);
+  }
+
+  categoria.nome = nome;
+  categoria.tipo = tipoFinal;
+
+  res.json(categoria);
+});
 module.exports = router;
