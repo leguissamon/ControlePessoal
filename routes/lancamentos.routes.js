@@ -73,4 +73,32 @@ router.post('/', (req, res) => {
   res.status(201).json(lancamento);
 });
 
+// Listar lançamentos (filtros opcionais: ?contaId=1&categoriaId=2)
+router.get('/', (req, res) => {
+  let lancamentos = db.lancamentos;
+
+  if (req.query.contaId) {
+    const contaId = Number(req.query.contaId);
+    lancamentos = lancamentos.filter((l) => l.contaId === contaId);
+  }
+
+  if (req.query.categoriaId) {
+    const categoriaId = Number(req.query.categoriaId);
+    lancamentos = lancamentos.filter((l) => l.categoriaId === categoriaId);
+  }
+
+  res.json(lancamentos);
+});
+
+// Buscar lançamento por id
+router.get('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const lancamento = db.lancamentos.find((l) => l.id === id);
+
+  if (!lancamento) {
+    throw new ErroHttp(404, 'Lançamento não encontrado.');
+  }
+
+  res.json(lancamento);
+});
 module.exports = router;
