@@ -101,4 +101,17 @@ router.get('/:id', (req, res) => {
 
   res.json(lancamento);
 });
+
+// Excluir lançamento
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const lancamento = db.lancamentos.find((l) => l.id === id);
+
+  if (!lancamento) {
+    throw new ErroHttp(404, 'Lançamento não encontrado.');
+  }
+
+  db.lancamentos.splice(db.lancamentos.indexOf(lancamento), 1);
+  res.status(204).send();
+});
 module.exports = router;
