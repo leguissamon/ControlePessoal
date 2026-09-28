@@ -105,13 +105,17 @@ router.get('/:id', (req, res) => {
 // Excluir lançamento
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const lancamento = db.lancamentos.find((l) => l.id === id);
+  const conta = db.contas.find((c) => c.id === id);
 
-  if (!lancamento) {
-    throw new ErroHttp(404, 'Lançamento não encontrado.');
+  if (!conta) {
+    throw new ErroHttp(404, 'Conta não encontrada.');
   }
 
-  db.lancamentos.splice(db.lancamentos.indexOf(lancamento), 1);
+  if (db.lancamentos.some((l) => l.contaId === conta.id)) {
+    throw new ErroHttp(409, 'Não é possível excluir: a conta possui lançamentos.');
+  }
+
+  db.contas.splice(db.contas.indexOf(conta), 1);
   res.status(204).send();
 });
 module.exports = router;
