@@ -19,4 +19,11 @@ function validarSaldoParaDespesa(conta, valor) {
     );
   }
 }
-module.exports = { saldoDaConta, validarSaldoParaDespesa };
+
+// Excluir uma receita reduz o saldo, então também não pode negativar a conta
+function validarExclusao(lancamento) {
+  if (lancamento.tipo === 'receita' && saldoDaConta(lancamento.contaId) - lancamento.valor < 0) {
+    throw new ErroHttp(422, 'Não é possível excluir esta receita: a conta ficaria com saldo negativo.');
+  }
+}
+module.exports = { saldoDaConta, validarSaldoParaDespesa, validarExclusao };

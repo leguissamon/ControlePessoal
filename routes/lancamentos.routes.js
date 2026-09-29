@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
 const { validarSaldoParaDespesa } = require('../services/regras');
-
+const { validarSaldoParaDespesa, validarExclusao } = require('../services/regras');
 const router = Router();
 
 const TIPOS_VALIDOS = ['receita', 'despesa'];
@@ -110,17 +110,15 @@ router.get('/:id', (req, res) => {
 // Excluir lançamento
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const conta = db.contas.find((c) => c.id === id);
+  const lancamento = db.lancamentos.find((l) => l.id === id);
 
-  if (!conta) {
-    throw new ErroHttp(404, 'Conta não encontrada.');
+  if (!lancamento) {
+    throw new ErroHttp(404, 'Lançamento não encontrado.');
   }
 
-  if (db.lancamentos.some((l) => l.contaId === conta.id)) {
-    throw new ErroHttp(409, 'Não é possível excluir: a conta possui lançamentos.');
-  }
+  validarExclusao(lancamento);   // 👈 NOVO — entra aqui, antes do splice
 
-  db.contas.splice(db.contas.indexOf(conta), 1);
+  db.lancamentos.splice(db.lancamentos.indexOf(lancamento), 1);
   res.status(204).send();
 });
 module.exports = router;
