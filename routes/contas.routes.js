@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
+const { saldoDaConta } = require('../services/regras');
 
 const router = Router();
 
@@ -81,5 +82,17 @@ router.delete('/:id', (req, res) => {
 
   db.contas.splice(db.contas.indexOf(conta), 1);
   res.status(204).send();
+});
+
+// Saldo da conta
+router.get('/:id/saldo', (req, res) => {
+  const id = Number(req.params.id);
+  const conta = db.contas.find((c) => c.id === id);
+
+  if (!conta) {
+    throw new ErroHttp(404, 'Conta não encontrada.');
+  }
+
+  res.json({ contaId: conta.id, nome: conta.nome, saldo: saldoDaConta(conta.id) });
 });
 module.exports = router;

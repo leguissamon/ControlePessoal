@@ -93,7 +93,9 @@ router.delete('/:id', (req, res) => {
   if (!categoria) {
     throw new ErroHttp(404, 'Categoria não encontrada.');
   }
-
+    if (db.lancamentos.some((l) => l.categoriaId === categoria.id)) {
+    throw new ErroHttp(409, 'Não é possível excluir: a categoria possui lançamentos.');
+  }
   db.categorias.splice(db.categorias.indexOf(categoria), 1);
   res.status(204).send();
 });
