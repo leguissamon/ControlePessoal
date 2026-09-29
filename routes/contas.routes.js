@@ -104,11 +104,15 @@ router.get('/:id/extrato', (req, res) => {
     throw new ErroHttp(404, 'Conta não encontrada.');
   }
 
+  const { de, ate } = req.query;
+
   const lancamentos = db.lancamentos
     .filter((l) => l.contaId === conta.id)
+    .filter((l) => (de ? l.data >= de : true))
+    .filter((l) => (ate ? l.data <= ate : true))
     .sort((a, b) => a.data.localeCompare(b.data));
 
-  res.json({ contaId: conta.id, lancamentos });
+  res.json({ contaId: conta.id, periodo: { de: de ?? null, ate: ate ?? null }, lancamentos });
 });
 
 module.exports = router;
