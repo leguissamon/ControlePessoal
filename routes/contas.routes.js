@@ -95,4 +95,34 @@ router.get('/:id/saldo', (req, res) => {
 
   res.json({ contaId: conta.id, nome: conta.nome, saldo: saldoDaConta(conta.id) });
 });
+// Extrato da conta (todos os lançamentos, por enquanto sem filtro)
+router.get('/:id/extrato', (req, res) => {
+  const id = Number(req.params.id);
+  const conta = db.contas.find((c) => c.id === id);
+
+  if (!conta) {
+    throw new ErroHttp(404, 'Conta não encontrada.');
+  }
+
+  const { de, ate } = req.query;
+
+  const lancamentos = db.lancamentos
+    .filter((l) => l.contaId === conta.id)
+    .filter((l) => (de ? l.data >= de : true))
+    .filter((l) => (ate ? l.data <= ate : true))
+    .sort((a, b) => a.data.localeCompare(b.data));
+
+  const receitas = lancamentos.filter((l) => l.tipo === 'receita').reduce((s, l) => s + l.valor, 0);   
+  const despesas = lancamentos.filter((l) => l.tipo === 'despesa').reduce((s, l) => s + l.valor, 0);  
+
+  res.json({
+    contaId: conta.id,
+    periodo: { de: de ?? null, ate: ate ?? null },
+    totalReceitas: receitas,        
+    totalDespesas: despesas,       
+    resultadoDoPeriodo: receitas - despesas,  
+    lancamentos,
+  });
+});
+
 module.exports = router;
