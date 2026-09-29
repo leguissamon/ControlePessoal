@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
+const { validarSaldoParaDespesa } = require('../services/regras');
 
 const router = Router();
 
@@ -57,6 +58,10 @@ router.post('/', (req, res) => {
   if (categoria.usuarioId !== conta.usuarioId) {
     throw new ErroHttp(422, 'A conta e a categoria precisam pertencer ao mesmo usuário.');
   }
+
+  if (tipo === 'despesa') {              // 👈 NOVO
+    validarSaldoParaDespesa(conta, valor); // 👈 NOVO
+  }                                        // 👈 NOVO
 
   const lancamento = {
     id: proximoId('lancamentos'),
