@@ -1,8 +1,7 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
-const { validarSaldoParaDespesa } = require('../services/regras');
-const { validarSaldoParaDespesa, validarExclusao } = require('../services/regras');
+const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer } = require('../services/regras');
 const router = Router();
 
 const TIPOS_VALIDOS = ['receita', 'despesa'];
@@ -59,9 +58,10 @@ router.post('/', (req, res) => {
     throw new ErroHttp(422, 'A conta e a categoria precisam pertencer ao mesmo usuário.');
   }
 
-  if (tipo === 'despesa') {              // 👈 NOVO
-    validarSaldoParaDespesa(conta, valor); // 👈 NOVO
-  }                                        // 👈 NOVO
+  if (tipo === 'despesa') {
+    validarSaldoParaDespesa(conta, valor);
+    validarLimiteLazer(conta, categoria, valor, data); 
+  }
 
   const lancamento = {
     id: proximoId('lancamentos'),
