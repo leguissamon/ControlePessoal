@@ -38,3 +38,9 @@ Os dados ficam em memória (arrays) e são apagados quando o servidor reinicia. 
 | GET | /lancamentos?contaId=1&categoriaId=2 | Lista lançamentos (filtros opcionais) |
 | GET | /lancamentos/:id | Busca um lançamento |
 | DELETE | /lancamentos/:id | Exclui lançamento |
+
+## Regras de negócio
+
+1. **Lazer ≤ 10% da renda mensal.** Uma despesa em categoria do tipo `lazer` é recusada (422) se o total de lazer do mês, com ela, ultrapassar 10% da renda do mês (soma das receitas do usuário em todas as contas).
+2. **Reserva mínima de 20%.** Despesas que não são de reserva não podem ultrapassar 80% da renda do mês, garantindo que 20% fiquem disponíveis pra reserva.
+3. **Sem saldo negativo.** Uma despesa é recusada (422) se deixar a conta com saldo menor que zero. Excluir uma receita também é bloqueado se isso deixar o saldo negativo.
