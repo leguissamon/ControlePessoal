@@ -60,4 +60,35 @@ function validarLimiteLazer(conta, categoria, valor, data) {
     );
   }
 }
-module.exports = { saldoDaConta, validarSaldoParaDespesa, validarExclusao, validarLimiteLazer };
+// Soma as despesas do usuário no mês, exceto as de categorias do tipo "reserva"
+function gastoNaoReservaDoMes(usuarioId, mes) {
+  return db.lancamentos
+    .filter((l) => l.usuarioId === usuarioId && l.tipo === 'despesa' && l.data.slice(0, 7) === mes)
+    .filter((l) => {
+      const categoria = db.categorias.find((c) => c.id === l.categoriaId);
+      return categoria.tipo !== 'reserva';
+    })
+    .reduce((soma, l) => soma + l.valor, 0);
+}
+const PERCENTUAL_RESERVA_MINIMO = 20;
+
+// Regra 2: no mínimo 20% da renda deve sobrar pra reserva.
+// Na prática: gastos que não são de reserva não podem passar de 80% da renda do mês.
+function validarReservaMinima(conta, categoria, valor, data) {
+  if (categoria.tipo === 'reserva') return;
+
+  const mes = data.slice(0, 7);
+  const renda = rendaDoMes(conta.usuarioId, mes);
+  const gastoAtual = gastoNaoReservaDoMes(conta.usuarioId, mes);
+  const percentualMaximo = 100 - PERCENTUAL_RESERVA_MINIMO;
+  const limite = Math.floor((renda * percentualMaximo) / 100);
+
+  if (gastoAtual + valor > limite) {
+    throw new ErroHttp(
+      422,
+      `Reserva mínima comprometida: ${PERCENTUAL_RESERVA_MINIMO}% da renda do mês (${reais(renda)}) deve ser guardada. O teto de gastos é ${reais(limite)} e já há ${reais(gastoAtual)} gastos.`
+    );
+  }
+}
+
+module.exports = { saldoDaConta, validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima };

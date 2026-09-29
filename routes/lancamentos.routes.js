@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
-const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer } = require('../services/regras');
+const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima } = require('../services/regras');
 const router = Router();
 
 const TIPOS_VALIDOS = ['receita', 'despesa'];
@@ -61,6 +61,7 @@ router.post('/', (req, res) => {
   if (tipo === 'despesa') {
     validarSaldoParaDespesa(conta, valor);
     validarLimiteLazer(conta, categoria, valor, data); 
+    validarReservaMinima(conta, categoria, valor, data);
   }
 
   const lancamento = {
