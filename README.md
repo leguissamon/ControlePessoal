@@ -19,3 +19,22 @@ Os dados ficam em memória (arrays) e são apagados quando o servidor reinicia. 
 - **Lançamento**: id, usuarioId, contaId, categoriaId, tipo (receita/despesa), valor (em centavos), data, descricao
 
 > Valores em centavos: `30000` = R$ 300,00. Datas no formato `AAAA-MM-DD`.
+
+### Categorias
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /categorias | Cria categoria (usuarioId, nome, tipo opcional) |
+| GET | /categorias?usuarioId=1 | Lista categorias (filtro opcional) |
+| GET | /categorias/:id | Busca uma categoria |
+| PUT | /categorias/:id | Atualiza (nome, tipo) |
+| DELETE | /categorias/:id | Exclui (409 se tiver lançamentos) |
+
+### Lançamentos
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /lancamentos | Registra receita/despesa (aplica as regras) |
+| GET | /lancamentos?contaId=1&categoriaId=2 | Lista lançamentos (filtros opcionais) |
+| GET | /lancamentos/:id | Busca um lançamento |
+| DELETE | /lancamentos/:id | Exclui lançamento |
