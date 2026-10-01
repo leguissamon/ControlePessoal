@@ -20,6 +20,17 @@ Os dados ficam em memória (arrays) e são apagados quando o servidor reinicia. 
 
 > Valores em centavos: `30000` = R$ 300,00. Datas no formato `AAAA-MM-DD`.
 
+
+### Usuários
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /usuarios | Cria usuário (nome, email) |
+| GET | /usuarios | Lista usuários |
+| GET | /usuarios/:id | Busca um usuário |
+| PUT | /usuarios/:id | Atualiza (nome, email) |
+| DELETE | /usuarios/:id | Exclui usuário |
+
 ### Categorias
 
 | Método | Rota | Descrição |
