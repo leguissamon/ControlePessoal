@@ -20,6 +20,29 @@ Os dados ficam em memória (arrays) e são apagados quando o servidor reinicia. 
 
 > Valores em centavos: `30000` = R$ 300,00. Datas no formato `AAAA-MM-DD`.
 
+### Usuários
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /usuarios | Cria usuário (nome, email) |
+| GET | /usuarios | Lista usuários |
+| GET | /usuarios/:id | Busca um usuário |
+| PUT | /usuarios/:id | Atualiza (nome, email) |
+| DELETE | /usuarios/:id | Exclui usuário |
+
+
+### Contas
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /contas | Cria conta (usuarioId, nome) |
+| GET | /contas?usuarioId=1 | Lista contas (filtro opcional) |
+| GET | /contas/:id | Busca uma conta |
+| PUT | /contas/:id | Atualiza o nome |
+| DELETE | /contas/:id | Exclui (409 se tiver lançamentos) |
+| GET | /contas/:id/saldo | Saldo atual da conta |
+| GET | /contas/:id/extrato?de=AAAA-MM-DD&ate=AAAA-MM-DD | Extrato por período |
+
 ### Categorias
 
 | Método | Rota | Descrição |
