@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
 const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima } = require('../services/regras');
+
 const router = Router();
 
 const TIPOS_VALIDOS = ['receita', 'despesa'];
@@ -80,8 +81,14 @@ router.post('/', (req, res) => {
 });
 
 // Listar lançamentos (filtros opcionais: ?contaId=1&categoriaId=2)
+// Listar lançamentos (filtros opcionais: ?usuarioId=1&contaId=1&categoriaId=2)
 router.get('/', (req, res) => {
   let lancamentos = db.lancamentos;
+
+  if (req.query.usuarioId) {
+    const usuarioId = Number(req.query.usuarioId);
+    lancamentos = lancamentos.filter((l) => l.usuarioId === usuarioId);
+  }
 
   if (req.query.contaId) {
     const contaId = Number(req.query.contaId);
@@ -93,7 +100,8 @@ router.get('/', (req, res) => {
     lancamentos = lancamentos.filter((l) => l.categoriaId === categoriaId);
   }
 
-  res.json(lancamentos);
+  res.json({ data: lancamentos, meta: { total: lancamentos.length } });
+
 });
 
 // Buscar lançamento por id

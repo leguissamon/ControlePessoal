@@ -28,7 +28,7 @@ router.post('/', (req, res) => {
 
 // Listar usuários
 router.get('/', (req, res) => {
-  res.json(db.usuarios);
+  res.json({ data: db.usuarios, meta: { total: db.usuarios.length } });
 });
 
 // Buscar usuário por id

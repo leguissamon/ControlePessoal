@@ -44,7 +44,7 @@ router.get('/', (req, res) => {
     categorias = categorias.filter((c) => c.usuarioId === usuarioId);
   }
 
-  res.json(categorias);
+res.json({ data: categorias, meta: { total: categorias.length } });
 });
 
 // Buscar categoria por id

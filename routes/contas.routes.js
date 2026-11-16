@@ -37,7 +37,7 @@ router.get('/', (req, res) => {
     contas = contas.filter((c) => c.usuarioId === usuarioId);
   }
 
-  res.json(contas);
+res.json({ data: contas, meta: { total: contas.length } });
 });
 
 // Buscar conta por id
@@ -72,12 +72,17 @@ router.put('/:id', (req, res) => {
 });
 
 // Excluir conta (só se não tiver lançamentos)
+// Excluir conta (só se não tiver lançamentos)
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
   const conta = db.contas.find((c) => c.id === id);
 
   if (!conta) {
     throw new ErroHttp(404, 'Conta não encontrada.');
+  }
+
+  if (db.lancamentos.some((l) => l.contaId === conta.id)) {
+    throw new ErroHttp(409, 'Não é possível excluir: a conta possui lançamentos.');
   }
 
   db.contas.splice(db.contas.indexOf(conta), 1);
