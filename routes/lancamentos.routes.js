@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { db, proximoId } = require('../data/db');
 const { ErroHttp } = require('../utils/erros');
-const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima } = require('../services/regras');
+const { validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima, validarEdicao } = require('../services/regras');
 
 const router = Router();
 
@@ -31,10 +31,9 @@ function dataValida(valor) {
   const d = new Date(`${valor}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === valor;
 }
-
-// Registrar lançamento
-router.post('/', (req, res) => {
-  const { contaId, categoriaId, tipo, valor, data, descricao } = req.body ?? {};
+// Confere os campos do corpo (usado no cadastro e na edição)
+function validarDados(body) {
+  const { contaId, categoriaId, tipo, valor, data, descricao } = body ?? {};
 
   if (!contaId || !categoriaId || !tipo || valor === undefined || !data) {
     throw new ErroHttp(400, 'Os campos "contaId", "categoriaId", "tipo", "valor" e "data" são obrigatórios.');
@@ -52,8 +51,21 @@ router.post('/', (req, res) => {
     throw new ErroHttp(400, 'O campo "data" deve ser uma data válida no formato AAAA-MM-DD.');
   }
 
-  const conta = buscarConta(Number(contaId));
-  const categoria = buscarCategoria(Number(categoriaId));
+  return {
+    contaId: Number(contaId),
+    categoriaId: Number(categoriaId),
+    tipo,
+    valor,
+    data,
+    descricao: descricao || '',
+  };
+}
+// Registrar lançamento
+router.post('/', (req, res) => {
+  const { contaId, categoriaId, tipo, valor, data, descricao } = validarDados(req.body);
+
+  const conta = buscarConta(contaId);
+  const categoria = buscarCategoria(categoriaId);
 
   if (categoria.usuarioId !== conta.usuarioId) {
     throw new ErroHttp(422, 'A conta e a categoria precisam pertencer ao mesmo usuário.');
@@ -61,7 +73,7 @@ router.post('/', (req, res) => {
 
   if (tipo === 'despesa') {
     validarSaldoParaDespesa(conta, valor);
-    validarLimiteLazer(conta, categoria, valor, data); 
+    validarLimiteLazer(conta, categoria, valor, data);
     validarReservaMinima(conta, categoria, valor, data);
   }
 
@@ -73,7 +85,7 @@ router.post('/', (req, res) => {
     tipo,
     valor,
     data,
-    descricao: descricao || '',
+    descricao,
   };
   db.lancamentos.push(lancamento);
 
@@ -112,6 +124,37 @@ router.get('/:id', (req, res) => {
   if (!lancamento) {
     throw new ErroHttp(404, 'Lançamento não encontrado.');
   }
+
+  res.json(lancamento);
+});
+
+// Editar lançamento (o corpo tem os mesmos campos do cadastro)
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const lancamento = db.lancamentos.find((l) => l.id === id);
+
+  if (!lancamento) {
+    throw new ErroHttp(404, 'Lançamento não encontrado.');
+  }
+
+  const { contaId, categoriaId, tipo, valor, data, descricao } = validarDados(req.body);
+
+  const conta = buscarConta(contaId);
+  const categoria = buscarCategoria(categoriaId);
+
+  if (categoria.usuarioId !== conta.usuarioId) {
+    throw new ErroHttp(422, 'A conta e a categoria precisam pertencer ao mesmo usuário.');
+  }
+
+  validarEdicao(lancamento, { contaId: conta.id, tipo, valor, data }, conta, categoria);
+
+  lancamento.usuarioId = conta.usuarioId;
+  lancamento.contaId = conta.id;
+  lancamento.categoriaId = categoria.id;
+  lancamento.tipo = tipo;
+  lancamento.valor = valor;
+  lancamento.data = data;
+  lancamento.descricao = descricao;
 
   res.json(lancamento);
 });

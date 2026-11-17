@@ -90,5 +90,30 @@ function validarReservaMinima(conta, categoria, valor, data) {
     );
   }
 }
+// Edição: valida como se o lançamento antigo nunca tivesse existido
+// e o novo estivesse sendo registrado agora.
+function validarEdicao(antigo, novo, conta, categoria) {
+  const posicao = db.lancamentos.indexOf(antigo);
+  db.lancamentos.splice(posicao, 1); // tira o antigo só durante a conferência
 
-module.exports = { saldoDaConta, validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima };
+  try {
+    if (novo.tipo === 'despesa') {
+      validarSaldoParaDespesa(conta, novo.valor);
+      validarLimiteLazer(conta, categoria, novo.valor, novo.data);
+      validarReservaMinima(conta, categoria, novo.valor, novo.data);
+    }
+
+    // Sem o antigo, a conta de origem perde o efeito dele (era uma receita, por exemplo).
+    if (antigo.contaId !== novo.contaId && saldoDaConta(antigo.contaId) < 0) {
+      throw new ErroHttp(422, 'Não é possível alterar: a conta de origem ficaria com saldo negativo.');
+    }
+
+    // Mesma conta e agora é receita: saldo final = saldo sem o antigo + a nova receita.
+    if (novo.tipo === 'receita' && antigo.contaId === novo.contaId && saldoDaConta(novo.contaId) + novo.valor < 0) {
+      throw new ErroHttp(422, 'Não é possível alterar esta receita: a conta ficaria com saldo negativo.');
+    }
+  } finally {
+    db.lancamentos.splice(posicao, 0, antigo); // devolve o antigo, aconteça o que acontecer
+  }
+}
+module.exports = { saldoDaConta, validarSaldoParaDespesa, validarExclusao, validarLimiteLazer, validarReservaMinima, validarEdicao };
