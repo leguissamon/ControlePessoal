@@ -46,7 +46,6 @@ router.get('/', (req, res) => {
 
 res.json({ data: categorias, meta: { total: categorias.length } });
 });
-
 // Buscar categoria por id
 router.get('/:id', (req, res) => {
   const id = Number(req.params.id);

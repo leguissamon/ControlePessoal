@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { conectar } = require('./config/mongo');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const { naoEncontrado, tratadorDeErros } = require('./middlewares/erros');
 const contasRoutes = require('./routes/contas.routes');
@@ -7,9 +9,9 @@ const categoriasRoutes = require('./routes/categorias.routes');
 const lancamentosRoutes = require('./routes/lancamentos.routes');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.use(cors({ origin: 'http://localhost:5173' }));
-app.use(express.json());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -24,6 +26,16 @@ app.use('/api/v1/lancamentos', lancamentosRoutes);
 app.use(naoEncontrado);
 app.use(tratadorDeErros);
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+async function iniciar() {
+  await conectar();
+  console.log('Conectado ao MongoDB');
+
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+  });
+}
+
+iniciar().catch((erro) => {
+  console.error('Não foi possível iniciar a API:', erro.message);
+  process.exit(1);
 });
