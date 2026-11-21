@@ -55,12 +55,12 @@ async function remover(id) {
 }
 
 // Saldo (em centavos) = receitas - despesas da conta.
-async function calcularSaldo(contaId) {
+// Se "ignorarId" for informado, esse lançamento fica de fora (usado na edição).
+async function calcularSaldo(contaId, ignorarId) {
   const lancamentos = await lancamentoModel.buscarTodas({ contaId: String(contaId) });
-  return lancamentos.reduce(
-    (saldo, l) => (l.tipo === 'receita' ? saldo + l.valor : saldo - l.valor),
-    0
-  );
+  return lancamentos
+    .filter((l) => l._id.toString() !== ignorarId)
+    .reduce((saldo, l) => (l.tipo === 'receita' ? saldo + l.valor : saldo - l.valor), 0);
 }
 
 async function saldo(id) {
