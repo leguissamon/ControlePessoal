@@ -1,8 +1,8 @@
 {
   "name": "controlepessoal",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "server.js",
+"description": "API de controle financeiro pessoal (Express + MongoDB)",
   "scripts": {
   "db:start": "docker compose up -d",
   "db:stop": "docker compose down",
